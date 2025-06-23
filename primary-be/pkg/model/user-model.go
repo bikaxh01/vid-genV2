@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/bikaxh/vid-gen/primary-be/pkg/db"
+	
 	"github.com/bikaxh/vid-gen/primary-be/pkg/utils"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -12,17 +13,17 @@ import (
 
 type User struct {
 	gorm.Model
-	ID       string `gorm:"type:uuid;primaryKey" json:id`
-	Email    string `gorm:"primaryKey" json:email validate:"required"`
-	UserName string `json:userName validate:"required"` 
-	Password string `json:password validate:"required"`
+	ID       string `gorm:"type:uuid;primaryKey" json:"id"`
+	Email    string `gorm:"primaryKey" json:"email" validate:"required"`
+	UserName string `json:"userName" validate:"required"`
+	Password string `json:"password" validate:"required"`
 
 	Projects []Project `gorm:"foreignKey:UserId"`
 }
 
 func init() {
 	db.Connect()
-	db.Db.AutoMigrate(&User{})
+	// db.Db.AutoMigrate(&User{},&Project{},&Scene{})
 }
 
 func (user *User) Save() (*User, error) {
@@ -48,7 +49,7 @@ func FindUserById(userId string) (*User, error) {
 	var user User = User{
 		ID: userId,
 	}
-	result := db.Db.First(&userId, &user)
+	result := db.Db.First(&user, &user)
 
 	user.Password = ""
 	if result.Error != nil {
@@ -64,7 +65,6 @@ func FindUserByEmail(email string) (*User, error) {
 		Email: email,
 	}
 	result := db.Db.First(&existingUser, &existingUser)
-
 
 	if result.Error != nil {
 		return nil, errors.New("User not found")

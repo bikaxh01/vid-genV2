@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/bikaxh/vid-gen/primary-be/pkg/handler"
-
+	"github.com/bikaxh/vid-gen/primary-be/pkg/middleware"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -20,9 +20,11 @@ func main() {
 	})
 
 	userRouter := app.Group("/user")
-
 	userRouter.Post("/sign-up", handler.SignUpHandler)
-	userRouter.Post("/sign-in", handler.SignInHandler)
+	userRouter.Post("/sign-in",  handler.SignInHandler)
+
+	projectRouter := app.Group("/project", middleware.AuthMiddleware())
+	projectRouter.Post("/create-project", handler.CreateProjectHandler)
 
 	app.Listen(":8000")
 

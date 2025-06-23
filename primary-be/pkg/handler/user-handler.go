@@ -1,9 +1,6 @@
 package handler
 
 import (
-	"encoding/json"
-	
-
 	"github.com/bikaxh/vid-gen/primary-be/pkg/model"
 	"github.com/bikaxh/vid-gen/primary-be/pkg/utils"
 	"github.com/gofiber/fiber/v2"
@@ -13,7 +10,8 @@ func SignUpHandler(c *fiber.Ctx) error {
 
 	var user model.User
 
-	err := json.Unmarshal(c.Body(), &user)
+	
+	err := c.BodyParser(&user)
 
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Invalid Request Body"})
@@ -34,8 +32,7 @@ func SignUpHandler(c *fiber.Ctx) error {
 func SignInHandler(c *fiber.Ctx) error {
 
 	var user model.User
-
-	err := json.Unmarshal(c.Body(), &user)
+	err := c.BodyParser(&user)
 
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Invalid Request Body"})
@@ -53,12 +50,12 @@ func SignInHandler(c *fiber.Ctx) error {
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Incorrect password"})
 	}
- 
+
 	// generate token
 	token, err := utils.GenerateToken(existingUser.Email, existingUser.ID)
 
 	if err != nil {
-	
+
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Something went wrong"})
 	}
 

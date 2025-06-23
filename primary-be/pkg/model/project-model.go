@@ -2,7 +2,7 @@ package model
 
 import (
 	
-	"github.com/bikaxh/vid-gen/primary-be/pkg/db"
+	
 
 	"gorm.io/gorm"
 )
@@ -40,7 +40,8 @@ type Scene struct {
 	
 }
 
-func init() {
-	db.Connect()
-	db.Db.AutoMigrate(&Project{}, &Scene{})
-}
+
+
+
+
+
