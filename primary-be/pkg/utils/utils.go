@@ -1,15 +1,19 @@
 package utils
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
 	"os"
 	"time"
 
+	"context"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/joho/godotenv"
 	"golang.org/x/crypto/bcrypt"
+	"google.golang.org/genai"
 )
 
 func HashPassword(password string) (*string, error) {
@@ -40,7 +44,7 @@ func GenerateToken(email, id string) (*string, error) {
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user_id": id,
 		"email":   email,
-		"exp":     time.Now().Add(time.Hour * 1).Unix(),
+		"exp":     time.Now().Add(time.Hour * 24).Unix(),
 	})
 
 	secretKey := GoDotEnvVariable("JWT_SECRET")
@@ -87,4 +91,137 @@ func GoDotEnvVariable(key string) string {
 	}
 
 	return os.Getenv(key)
+}
+
+type SceneType struct {
+	AnimationTypes []string          `json:"animationTypes"`
+	ColorScheme    map[string]string `json:"colorScheme"`
+	Instruction    string            `json:"instruction"`
+	SceneTitle     string            `json:"sceneTitle"`
+	VisualElements []string          `json:"visualElements"`
+}
+
+type GeneratePlanType []SceneType
+
+func GeneratePlan(prompt string) (GeneratePlanType, error) {
+
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, &genai.ClientConfig{
+		APIKey:  GoDotEnvVariable("GEMINI_API_KEY"),
+		Backend: genai.BackendGeminiAPI,
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	config := &genai.GenerateContentConfig{
+		ResponseMIMEType: "application/json",
+		ResponseSchema: &genai.Schema{
+			Type: genai.TypeObject,
+			Properties: map[string]*genai.Schema{
+				"metaData": {
+					Type:        genai.TypeObject,
+					Description: "This will contain the title and description of the Topic",
+					Properties: map[string]*genai.Schema{
+						"title": {
+							Type:        genai.TypeString,
+							Description: "This will be the title of the topic",
+						},
+						"description": {
+							Type:        genai.TypeString,
+							Description: "This will be the short description of the topic",
+						},
+					},
+					Required: []string{"title", "description"},
+				},
+				"scenesData": {
+					Type:        genai.TypeArray,
+					Description: "This will be the array of scenes",
+					Items: &genai.Schema{
+						Type: genai.TypeObject,
+						Properties: map[string]*genai.Schema{
+							"sceneTitle": {
+								Type:        genai.TypeString,
+								Description: "The title of the scene, describing the main focus or idea.",
+							},
+							"instruction": {
+								Type:        genai.TypeString,
+								Description: "A detailed explanation of what happens in the scene.",
+							},
+							"visualElements": {
+								Type:        genai.TypeArray,
+								Description: "List of visual elements and components shown in the scene (e.g., diagrams, titles, arrows).",
+								Items: &genai.Schema{
+									Type: genai.TypeString,
+								},
+							},
+							"sequence": {
+								Type:        genai.TypeNumber,
+								Description: "The sequence of the scene",
+							},
+							"colorScheme": {
+								Type:        genai.TypeObject,
+								Description: "A consistent color scheme used in the scene.",
+								Properties: map[string]*genai.Schema{
+									"background": {
+										Type:        genai.TypeString,
+										Description: "The background color (e.g., 'light blue')",
+									},
+									"text": {
+										Type:        genai.TypeString,
+										Description: "The primary text color (e.g., 'white')",
+									},
+									"highlights": {
+										Type:        genai.TypeString,
+										Description: "The color used for highlighting key elements (e.g., 'yellow')",
+									},
+								},
+								Required: []string{"background", "text", "highlights"},
+							},
+							"animationTypes": {
+								Type:        genai.TypeArray,
+								Description: "List of animation types used in the scene (e.g., Write, FadeIn, Transform).",
+								Items: &genai.Schema{
+									Type: genai.TypeString,
+								},
+							},
+						},
+						Required: []string{
+							"sceneTitle",
+							"description",
+							"title",
+							"instruction"
+							"visualElements",
+							"colorScheme",
+							"animationTypes",
+						},
+					},
+				},
+			},
+			Required: []string{"metaData", "scenesData"},
+		},
+	}
+	result, err := client.Models.GenerateContent(
+		ctx,
+		"models/gemini-2.5-flash-lite-preview-06-17",
+		genai.Text(GetPrompt(prompt)),
+		config,
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("🟢", result.Text())
+	res := []byte(result.Text())
+
+	var plan GeneratePlanType
+	err = json.Unmarshal(res, &plan)
+
+	if err != nil {
+		fmt.Println("🔴", err)
+		return nil, err
+	}
+
+	return plan, nil
+
 }
