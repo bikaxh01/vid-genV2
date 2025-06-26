@@ -1,7 +1,12 @@
 import React from "react";
+import PromptInput from "./_components/promptInput/PromptInput";
 
 function Home() {
-  return <div className=" border-red-500 h-full w-full border flex items-center justify-center">Home</div>;
+  return (
+    <div className="  h-full w-full  flex items-center justify-center">
+      <PromptInput />
+    </div>
+  );
 }
 
 export default Home;
