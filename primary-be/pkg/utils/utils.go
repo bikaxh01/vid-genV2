@@ -93,17 +93,17 @@ func GoDotEnvVariable(key string) string {
 	return os.Getenv(key)
 }
 
-type SceneType struct {
-	AnimationTypes []string          `json:"animationTypes"`
-	ColorScheme    map[string]string `json:"colorScheme"`
-	Instruction    string            `json:"instruction"`
-	SceneTitle     string            `json:"sceneTitle"`
-	VisualElements []string          `json:"visualElements"`
-}
+// type SceneType struct {
+// 	AnimationTypes []string          `json:"animationTypes"`
+// 	ColorScheme    map[string]string `json:"colorScheme"`
+// 	Instruction    string            `json:"instruction"`
+// 	SceneTitle     string            `json:"sceneTitle"`
+// 	VisualElements []string          `json:"visualElements"`
+// }
 
-type GeneratePlanType []SceneType
+// type GeneratePlanType []SceneType
 
-func GeneratePlan(prompt string) (GeneratePlanType, error) {
+func GeneratePlan(prompt string) (map[string]any, error) {
 
 	ctx := context.Background()
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{
@@ -188,11 +188,10 @@ func GeneratePlan(prompt string) (GeneratePlanType, error) {
 						},
 						Required: []string{
 							"sceneTitle",
-							"description",
-							"title",
-							"instruction"
+							"instruction",
 							"visualElements",
 							"colorScheme",
+							"sequence",
 							"animationTypes",
 						},
 					},
@@ -211,17 +210,16 @@ func GeneratePlan(prompt string) (GeneratePlanType, error) {
 		log.Fatal(err)
 	}
 
-	fmt.Println("🟢", result.Text())
 	res := []byte(result.Text())
 
-	var plan GeneratePlanType
-	err = json.Unmarshal(res, &plan)
+	var data map[string]interface{}
+	err = json.Unmarshal(res, &data)
 
 	if err != nil {
 		fmt.Println("🔴", err)
 		return nil, err
 	}
 
-	return plan, nil
+	return data, nil
 
 }

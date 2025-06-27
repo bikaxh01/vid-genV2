@@ -5,25 +5,26 @@ import (
 	"fmt"
 
 	"github.com/bikaxh/vid-gen/primary-be/pkg/db"
-	
 	"github.com/bikaxh/vid-gen/primary-be/pkg/utils"
 	"github.com/google/uuid"
-	"gorm.io/gorm"
+	
+	"time"
 )
 
 type User struct {
-	gorm.Model
 	ID       string `gorm:"type:uuid;primaryKey" json:"id"`
 	Email    string `gorm:"primaryKey" json:"email" validate:"required"`
 	UserName string `json:"userName" validate:"required"`
 	Password string `json:"password" validate:"required"`
-
-	Projects []Project `gorm:"foreignKey:UserId"`
+	Projects  []Project `gorm:"foreignKey:UserId"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	
 }
 
 func init() {
 	db.Connect()
-	// db.Db.AutoMigrate(&User{},&Project{},&Scene{})
+	// db.Db.AutoMigrate(&User{}, &Project{}, &Scene{})
 }
 
 func (user *User) Save() (*User, error) {
@@ -53,7 +54,7 @@ func FindUserById(userId string) (*User, error) {
 
 	user.Password = ""
 	if result.Error != nil {
-		return nil, result.Error
+		return nil, errors.New("User not found")
 	}
 
 	return &user, nil

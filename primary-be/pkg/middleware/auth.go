@@ -3,7 +3,7 @@ package middleware
 import (
 	"fmt"
 
-	"strings"
+
 
 	"github.com/bikaxh/vid-gen/primary-be/pkg/model"
 	"github.com/bikaxh/vid-gen/primary-be/pkg/utils"
@@ -14,17 +14,13 @@ func AuthMiddleware() fiber.Handler {
 
 	return func(c *fiber.Ctx) error {
 
-		byteToken := c.Request().Header.Peek("Authorization")
+		token := c.Cookies("authToken")
 
-		bearerToken := string(byteToken)
-
-		if bearerToken == "" {
+		if token == "" {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
 				"message": "Unauthorized user",
 			})
 		}
-
-		token := strings.Split(bearerToken, " ")[1]
 
 		authData, err := utils.VerifyToken(token)
 
