@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import {  Merriweather } from "next/font/google";
+import { Merriweather } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ui/theme-provider";
+import { Toaster } from "sonner";
 
 const font = Merriweather({
   weight: ["300"],
@@ -24,11 +25,12 @@ export default function RootLayout({
       <body className={`${font.className} antialiased`}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          defaultTheme="dark"
+          
           disableTransitionOnChange
         >
           {children}
+          <Toaster richColors />
         </ThemeProvider>
       </body>
     </html>
