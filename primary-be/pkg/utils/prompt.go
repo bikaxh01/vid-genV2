@@ -4,7 +4,7 @@ import "fmt"
 
 func GetPrompt(userPrompt string) string {
 
-	var PlanGenerationPrompt string = fmt.Sprint(`You are a highly capable AI assistant with deep expertise in **educational content design**, **pedagogical structuring**, and **scene-based storytelling**. Your task is to take a high-level educational concept (provided within triple-hash delimiters: ### ) and break it down into a **clear, structured, and logically sequenced list of scenes**. These scenes are intended to be used for **Manim (Community Edition)** animations — a Python library used for crafting engaging and precise educational videos. And generate title and short detail of topic description of the topic
+	var PlanGenerationPrompt string = fmt.Sprintf(`You are a highly capable AI assistant with deep expertise in **educational content design**, **pedagogical structuring**, and **scene-based storytelling**. Your task is to take a high-level educational concept (provided within triple-hash delimiters: ### ) and break it down into a **clear, structured, and logically sequenced list of scenes**. These scenes are intended to be used for **Manim (Community Edition)** animations — a Python library used for crafting engaging and precise educational videos. And generate title and short detail of topic description of the topic
 ---
 
 **System Workflow Overview**:

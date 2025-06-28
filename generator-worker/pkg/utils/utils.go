@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"log"
 	"os"
+
 	"os/exec"
 	"path/filepath"
-	// "strings"
 
 	"github.com/bikaxh/vid-gen/generator/pkg/prompts"
 	"github.com/joho/godotenv"
@@ -115,20 +115,122 @@ func WriteToFile(fileName, content string) bool {
 	return true
 }
 
-func CompileFile(fileName string) {
-	mediaPath := filepath.Join("..", "..", "final", "code", fileName+".py")
-	absolutePath, err := filepath.Abs(mediaPath)
+func CompileFile(fileName string) (bool, error) {
+
+	pyFilePath := filepath.Join("..", "..", "final", "code", fileName+".py")
+	pyAbsolutePath, err := filepath.Abs(pyFilePath)
 
 	if err != nil {
-		fmt.Println("Error getting absolute path:", err)
+		fmt.Println("Error getting absolute path for Python file:", err)
+		return false, nil
 	}
-	fmt.Println(absolutePath)
-	cmd := exec.Command("manim", "-qh", absolutePath, "/code", fileName+".py",fileName, "-- media_dir", absolutePath)
 
-	res, err := cmd.Output()
+	mediaDirPath := filepath.Join("..", "..", "final", "media")
+	mediaAbsolutePath, err := filepath.Abs(mediaDirPath)
+	if err != nil {
+		fmt.Println("Error getting absolute path for media dir:", err)
+		return false, nil
+	}
+
+	cmd := exec.Command("manim", "-qh", pyAbsolutePath, fileName, "--media_dir", mediaAbsolutePath)
+	_, err = cmd.CombinedOutput()
 
 	if err != nil {
-		fmt.Println(err)
+
+		return false, err
+
 	}
-	fmt.Println(string(res))
+
+	return true, nil
+}
+
+func FixCode(err string, generatedScene SceneGeneration) {
+
+	history := []*genai.Content{
+		genai.NewContentFromText(prompts.GetFixCodePrompt(), genai.RoleModel),
+	}
+	initialCode, _ := ReadFile(generatedScene.ClassName)
+	fmt.Println("Fixing for 🟢", initialCode)
+
+	compilationError := err
+
+	currentPrompt := fmt.Sprintf("Compilation err: ###\n %v \n### current code : ###\n %v \n###", compilationError, initialCode)
+
+	for i := range 5 {
+		fmt.Println("Fixing for 🟢", i)
+		fmt.Println("histtory for 🟢", generatedScene.SceneTitle,"is",history)
+		//pass to llm
+		fixedCode := FixCodeLLM(history, currentPrompt)
+
+		//save code to file
+		WriteToFile(generatedScene.ClassName, fixedCode)
+		//compile
+		success, cErr := CompileFile(generatedScene.ClassName)
+		if cErr != nil {
+
+			compilationError = fmt.Sprintf("%+v", cErr)
+		}
+		initialCode, _ = ReadFile(generatedScene.ClassName)
+		if success == true {
+			break
+		}
+		history = append(history, genai.NewContentFromText(*initialCode, genai.RoleModel))
+	}
+
+}
+
+func ReadFile(fileName string) (*string, error) {
+	pyFilePath := filepath.Join("..", "..", "final", "code", fileName+".py")
+	pyAbsolutePath, err := filepath.Abs(pyFilePath)
+
+	if err != nil {
+		fmt.Println("Error getting absolute path for Python file:", err)
+		return nil, err
+	}
+
+	d, err := os.ReadFile(pyAbsolutePath)
+	data := string(d)
+	return &data, nil
+}
+
+func FixCodeLLM(history []*genai.Content, currentPrompt string) string {
+
+	ctx := context.Background()
+	client, err := genai.NewClient(ctx, &genai.ClientConfig{
+		APIKey: GoDotEnvVariable("GEMINI_API_KEY"),
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	config := &genai.GenerateContentConfig{
+		ResponseMIMEType: "application/json",
+		ResponseSchema: &genai.Schema{
+			Type:        genai.TypeObject,
+			Description: "Fixed code of scene",
+			Properties: map[string]*genai.Schema{
+				"code": {
+					Type:        genai.TypeString,
+					Description: "Fixed code of scene",
+				},
+			},
+			Required: []string{"code"},
+		},
+	}
+
+	chat, _ := client.Chats.Create(ctx, "gemini-2.5-flash", config, history)
+	res, _ := chat.SendMessage(ctx, genai.Part{Text: currentPrompt})
+
+	result := res.Candidates[0].Content.Parts[0].Text
+
+	bytTxt := []byte(result)
+
+	var data map[string]string
+	err = json.Unmarshal(bytTxt, &data)
+
+	if err != nil {
+		fmt.Println("🔴", err)
+		return err.Error()
+	}
+	return data["code"]
 }

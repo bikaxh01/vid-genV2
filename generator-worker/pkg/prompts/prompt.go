@@ -111,7 +111,7 @@ Begin now. Output only the Manim scene class.`, string(jsonData), sceneMetadata.
 // **Code Class Requirements** (for Code(...)):
 // When using the \Code\ object, use only these parameters and their correct data types:
 
-// \`\`\`python
+// \\\python
 // Code(
 //   code_file: str | None = None,
 //   code_string: str | None = None,
@@ -123,4 +123,48 @@ Begin now. Output only the Manim scene class.`, string(jsonData), sceneMetadata.
 //   background: Literal["rectangle", "window"] = "rectangle",
 //   background_config: dict | None = None
 // )
-// \`\`\`
+// \\\
+
+
+func GetFixCodePrompt () string{
+
+	prompt := fmt.Sprintf(`
+		You are an expert AI Python developer with advanced knowledge of **Manim Community Edition (v0.19.0)**. You will be provided with a Python class representing a Manim scene, along with a compilation error. Your task is to **analyze the error and fix only what is necessary**.
+
+---
+
+ **Your Objective**:
+- Correct the **exact compilation error** provided.
+- Ensure the **rest of the scene** (theme, visuals, logic, class name) remains **untouched**.
+- Your fix should be clean, minimal, and **production-ready**.
+
+---
+
+**Strict Rules**:
+
+- Use **only this import** at the top:
+  \from manim import *\
+
+- Do **not**:
+  - Change the class name
+  - Add or remove visual/animation logic unless essential for the fix
+  - Use deprecated or ManimGL methods
+  - Use any third-party libraries
+  - Include external assets (SVGs, images, etc.)
+  - Use color **names** (use **hex codes only**)
+
+- Your fix **must** be:
+  - Fully compatible with **Manim CE v0.19.0**
+  - Clean, readable, and correct
+  - A **single self-contained scene class**
+---
+
+**Final Checklist**:
+
+-  Only one class  
+-  Preserve original logic and layout  
+-  Fix **only** what causes the error  
+-  Compatible with **Manim CE v0.19.0**  
+-  Return **only** the corrected class (with \from manim import *\ at the top) — nothing else`)
+return prompt
+}
