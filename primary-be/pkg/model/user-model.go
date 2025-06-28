@@ -24,7 +24,7 @@ type User struct {
 
 func init() {
 	db.Connect()
-	// db.Db.AutoMigrate(&User{}, &Project{}, &Scene{})
+	//  db.Db.AutoMigrate(&User{}, &Project{}, &Scene{})
 }
 
 func (user *User) Save() (*User, error) {

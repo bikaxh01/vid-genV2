@@ -4,6 +4,7 @@ import (
 	"github.com/bikaxh/vid-gen/primary-be/pkg/model"
 	"github.com/bikaxh/vid-gen/primary-be/pkg/utils"
 	"github.com/gofiber/fiber/v2"
+	"fmt"
 )
 
 func CreateProjectHandler(c *fiber.Ctx) error {
@@ -35,4 +36,32 @@ func CreateProjectHandler(c *fiber.Ctx) error {
 		"data":    p,
 	})
 
+}
+
+func GenerateScenesHandler(c *fiber.Ctx) error {
+
+	var project model.Project
+	err := c.BodyParser(&project)
+
+	if err != nil {
+		fmt.Println("🔴",err)
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Invalid request body"})
+	}
+	// save to db
+
+	p, err := project.SavePlan()
+
+	if err != nil {
+
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "Internal server error",
+		})
+	}
+
+	// push to queue
+
+	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
+		"message": "Generating scenes",
+		"data":    p,
+	})
 }

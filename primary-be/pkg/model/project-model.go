@@ -1,11 +1,11 @@
 package model
 
 import (
-	"database/sql"
+	
 
 	"github.com/bikaxh/vid-gen/primary-be/pkg/db"
 	"github.com/google/uuid"
-
+	"gorm.io/datatypes"
 	"time"
 )
 
@@ -23,7 +23,7 @@ type Project struct {
 	Prompt      string         `json:"prompt"`
 	Title       string         `json:"title"`
 	Description string         `json:"description"`
-	Plan        sql.NullString `json:"plan"`
+	Plan        datatypes.JSON `json:"plan"`
 	Status      Status         `json:"status"`
 	Scenes      []Scene        `gorm:"foreignKey:ProjectId" json:"scenes"`
 	CreatedAt   time.Time
@@ -64,4 +64,15 @@ func (p *Project) CreateProject(plan map[string]interface{}) (*Project, error) {
 	}
 	return p, nil
 
+}
+
+func (p *Project) SavePlan() (*Project, error) {
+
+	result := db.Db.Model(p).Updates(Project{Plan: p.Plan, Title: p.Title, Description: p.Description})
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return p, nil
 }

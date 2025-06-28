@@ -31,6 +31,7 @@ func main() {
 
 	projectRouter := app.Group("/project", middleware.AuthMiddleware())
 	projectRouter.Post("/create-project", handler.CreateProjectHandler)
+	projectRouter.Post("/generate-scenes", handler.GenerateScenesHandler)
 
 	app.Listen(":8000")
 
