@@ -23,6 +23,7 @@ Each scene must include the following fields:
 - **sceneTitle**  - Title of scene
 - **sequence**-  (e.g., 1, 2, 3...)  
 - **instruction** – Explain what happens in the scene (what is taught, and how it's visualized).  
+- **script**   - In detail explanation of what the scene should contain the final output of the scene 
 - **visualElements** – Mention key objects like text, arrows, graphs, equations, or shapes.  
 - **colorScheme** – Use a simple, cohesive palette (no names, use hex codes like #FFFFFF)  
 - **animationTypes** – Use Manim-supported types like Write, FadeIn, Transform, Create, etc.

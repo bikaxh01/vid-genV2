@@ -144,6 +144,10 @@ func GeneratePlan(prompt string) (map[string]any, error) {
 								Type:        genai.TypeString,
 								Description: "The title of the scene, describing the main focus or idea.",
 							},
+							"script": {
+								Type:        genai.TypeString,
+								Description: "The in detail script  for  the scene.",
+							},
 							"instruction": {
 								Type:        genai.TypeString,
 								Description: "A detailed explanation of what happens in the scene.",
@@ -191,6 +195,7 @@ func GeneratePlan(prompt string) (map[string]any, error) {
 							"instruction",
 							"visualElements",
 							"colorScheme",
+							"script",
 							"sequence",
 							"animationTypes",
 						},
@@ -214,7 +219,7 @@ func GeneratePlan(prompt string) (map[string]any, error) {
 
 	var data map[string]interface{}
 	err = json.Unmarshal(res, &data)
-
+      
 	if err != nil {
 		fmt.Println("🔴", err)
 		return nil, err

@@ -22,8 +22,8 @@ type SceneGeneration struct {
 	SceneTitle  string `json:"sceneTitle"`
 }
 
-func GenerateCode(sceneMetadata prompts.Scene, scenes prompts.Scenes) (*SceneGeneration, error) {
-
+func GenerateCode(sceneMetadata prompts.Scene, scenes prompts.Scenes,previousCode string) (*SceneGeneration, error) {
+  
 	ctx := context.Background()
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{
 		APIKey:  GoDotEnvVariable("GEMINI_API_KEY"),
@@ -62,7 +62,7 @@ func GenerateCode(sceneMetadata prompts.Scene, scenes prompts.Scenes) (*SceneGen
 	result, err := client.Models.GenerateContent(
 		ctx,
 		"gemini-2.0-flash",
-		genai.Text(prompts.GetSceneGenerationPrompt(sceneMetadata, scenes)),
+		genai.Text(prompts.GetSceneGenerationPrompt(sceneMetadata, scenes,previousCode)),
 		config,
 	)
 
@@ -150,15 +150,15 @@ func FixCode(err string, generatedScene SceneGeneration) {
 		genai.NewContentFromText(prompts.GetFixCodePrompt(), genai.RoleModel),
 	}
 	initialCode, _ := ReadFile(generatedScene.ClassName)
-	fmt.Println("Fixing for 🟢", initialCode)
-
+	
 	compilationError := err
-
-	currentPrompt := fmt.Sprintf("Compilation err: ###\n %v \n### current code : ###\n %v \n###", compilationError, initialCode)
-
+	
+	currentPrompt := fmt.Sprintf("Compilation err: ###\n %v \n### current code : ###\n %v \n###", compilationError, *initialCode)
+	
 	for i := range 5 {
 		fmt.Println("Fixing for 🟢", i)
-		fmt.Println("histtory for 🟢", generatedScene.SceneTitle,"is",history)
+		
+		fmt.Println("Fixing for 🟢", *initialCode)
 		//pass to llm
 		fixedCode := FixCodeLLM(history, currentPrompt)
 
@@ -172,6 +172,7 @@ func FixCode(err string, generatedScene SceneGeneration) {
 		}
 		initialCode, _ = ReadFile(generatedScene.ClassName)
 		if success == true {
+			fmt.Println("successfully fixed 🟢", generatedScene.SceneTitle)
 			break
 		}
 		history = append(history, genai.NewContentFromText(*initialCode, genai.RoleModel))

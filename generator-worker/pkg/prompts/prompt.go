@@ -9,6 +9,7 @@ type Scene struct {
 	AnimationTypes []string          `json:"animationTypes"`
 	ColorScheme    map[string]string `json:"colorScheme"`
 	Instruction    string            `json:"instruction"`
+	Script         string            `json:"script"`
 	SceneTitle     string            `json:"sceneTitle"`
 	VisualElements []string          `json:"visualElements"`
 	Sequence       int               `json:"sequence"`
@@ -16,7 +17,7 @@ type Scene struct {
 
 type Scenes []Scene
 
-func GetSceneGenerationPrompt(sceneMetadata Scene, scenes Scenes) string {
+func GetSceneGenerationPrompt(sceneMetadata Scene, scenes Scenes, previousCode string) string {
 
 	colorBytes, _ := json.Marshal(sceneMetadata.ColorScheme)
 	animationBytes, _ := json.Marshal(sceneMetadata.AnimationTypes)
@@ -36,7 +37,8 @@ func GetSceneGenerationPrompt(sceneMetadata Scene, scenes Scenes) string {
 - Generate a **single, production-ready Manim scene class** that visually expresses the configuration described in the section titled **"Scene to Generate"**.
 - **Do not** include content or logic from other scenes listed in the broader context.
 - All visual elements, animations,Instruction and structure must adhere strictly to the configuration provided.
-
+- Make sure the text should not overlap 
+- text and model should be at there correct position
 ---
 
  **Rules and Constraints**:
@@ -83,13 +85,17 @@ func GetSceneGenerationPrompt(sceneMetadata Scene, scenes Scenes) string {
 \\\
 
 ---
+**Previous Scene Code***
 
+%v
+---
  **Scene to Generate**  
 Use this section ONLY to build your Manim scene:
 
 - **Title**: %v  
 - **Sequence**: %v  
 - **Instruction**: %v  
+- **script**: %v  
 - **Color Scheme**: %v  
 - **Animation Types**: %v  
 - **Visual Elements**: %v
@@ -103,7 +109,7 @@ Use this section ONLY to build your Manim scene:
 -  No template code, boilerplate, or external logic  
 -  Bug-free and executable in **Manim CE v0.19.0**
 
-Begin now. Output only the Manim scene class.`, string(jsonData), sceneMetadata.SceneTitle, sceneMetadata.Sequence, sceneMetadata.Instruction, colorScheme, animationTypes, visualElements)
+Begin now. Output only the Manim scene class.`, string(jsonData), previousCode, sceneMetadata.SceneTitle, sceneMetadata.Sequence, sceneMetadata.Instruction, sceneMetadata.Script, colorScheme, animationTypes, visualElements)
 
 	return prompt
 }
@@ -125,8 +131,7 @@ Begin now. Output only the Manim scene class.`, string(jsonData), sceneMetadata.
 // )
 // \\\
 
-
-func GetFixCodePrompt () string{
+func GetFixCodePrompt() string {
 
 	prompt := fmt.Sprintf(`
 		You are an expert AI Python developer with advanced knowledge of **Manim Community Edition (v0.19.0)**. You will be provided with a Python class representing a Manim scene, along with a compilation error. Your task is to **analyze the error and fix only what is necessary**.
@@ -166,5 +171,5 @@ func GetFixCodePrompt () string{
 -  Fix **only** what causes the error  
 -  Compatible with **Manim CE v0.19.0**  
 -  Return **only** the corrected class (with \from manim import *\ at the top) — nothing else`)
-return prompt
+	return prompt
 }

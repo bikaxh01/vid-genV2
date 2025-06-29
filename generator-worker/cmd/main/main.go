@@ -21,298 +21,200 @@ func main() {
   {
     "animationTypes": [
       "Write",
-      "FadeIn"
+      "FadeIn",
+      "Transform"
     ],
     "colorScheme": {
-      "background": "#1A1A2E",
-      "highlights": "#4D7FFF",
+      "background": "#121212",
+      "highlights": "#81C784",
       "text": "#FFFFFF"
     },
-    "instruction": "Display the main title 'Understanding the Transformer Architecture'. Briefly introduce the Transformer as a powerful neural network model, highlighting its impact on Natural Language Processing (NLP) and other fields. Use a clean, modern font.",
-    "sceneTitle": "Introduction to Transformers",
+    "instruction": "Introduce the concept of databases and then the idea of in-memory databases. Briefly mention Redis as a popular example.",
+    "sceneTitle": "What is a Database?",
+    "script": "Start with the title 'What is a Database?' written clearly. Show a stylized icon representing a traditional database (e.g., a cylinder). Then, introduce 'In-Memory Database' with text. Transition to a visual representing computer memory (RAM blocks). Finally, display the text 'Redis' prominently, perhaps with its logo, signifying it as a key player in this space.",
     "sequence": 1,
     "visualElements": [
-      "Title Text: 'Understanding the Transformer Architecture'",
-      "Subtitle Text: 'A Beginner's Guide'",
-      "Simple Network Graphic (Optional)"
+      "Title Text: What is a Database?",
+      "Icon: Traditional Database",
+      "Text: In-Memory Database",
+      "Visual: RAM Blocks",
+      "Text/Logo: Redis"
     ]
   },
   {
     "animationTypes": [
       "Write",
+      "FadeIn",
       "Transform",
-      "FadeOut"
+      "Create"
     ],
     "colorScheme": {
-      "background": "#1A1A2E",
-      "highlights": "#4D7FFF",
-      "text": "#FFFFFF"
+      "background": "#121212",
+      "highlights": "#FFD54F",
+      "text": "#E0E0E0"
     },
-    "instruction": "Briefly illustrate the limitations of older sequence models like RNNs. Show a sequence of words processed one by one, visually representing the 'sequential bottleneck' and mentioning challenges with long-range dependencies. Fade out this explanation.",
-    "sceneTitle": "Limitations of RNNs/LSTMs",
+    "instruction": "Explain the concept of caching using a simple analogy. Focus on the benefit of speed and reducing repetitive work.",
+    "sceneTitle": "Understanding Caching",
+    "script": "Display the title 'The Power of Caching'. Use an analogy: show a person needing a tool. First, they walk to a large, distant storage shed (representing the main database). Show this path as slow. Then, show a small, easily accessible toolbox right next to the person holding the most frequently used tools (representing the cache). Illustrate the person quickly grabbing a tool from the toolbox. Emphasize the speed difference with text like 'Faster Access!'.",
     "sequence": 2,
     "visualElements": [
-      "Text: 'Previous Models (RNNs/LSTMs)'",
-      "Visual: Sequential Arrows (Word1 -> Word2 -> Word3)",
-      "Text: 'Challenges: Sequential Processing, Long-Range Dependencies'"
+      "Title Text: The Power of Caching",
+      "Visual: Person walking to distant storage",
+      "Visual: Toolbox near the person",
+      "Icon: Frequently Used Tool",
+      "Text: Slow vs. Fast",
+      "Animation: Arrow showing quick access"
     ]
   },
   {
     "animationTypes": [
       "Write",
-      "Create",
-      "Indicate"
+      "FadeIn",
+      "Transform",
+      "MovingArrow"
     ],
     "colorScheme": {
-      "background": "#1A1A2E",
-      "highlights": "#FFD700",
+      "background": "#121212",
+      "highlights": "#64B5F6",
       "text": "#FFFFFF"
     },
-    "instruction": "Introduce the core concept of 'Attention'. Use an analogy: when translating a sentence, we focus on specific words. Show a sentence where a target word is highlighted, and related source words are visually emphasized or connected.",
-    "sceneTitle": "The Concept of Attention",
+    "instruction": "Show how Redis acts as a cache layer between a web application and a database, speeding up data retrieval.",
+    "sceneTitle": "Redis: Your Super-Fast Cache",
+    "script": "Show a title 'Redis: Your Super-Fast Cache'. Display a flow: [User] -> [Web Server] -> [Main Database]. Animate data flowing slowly from the database. Then, introduce Redis into the flow: [User] -> [Web Server] -> [Redis Cache]. Show data being retrieved quickly from Redis. Add a condition: if data is NOT in Redis cache ([Redis Cache] -> [Main Database]), then show the data going back to Redis. Highlight the speed improvement.",
     "sequence": 3,
     "visualElements": [
-      "Text: 'The Key Idea: Attention'",
-      "Example Sentence Displayed",
-      "Highlighting Effect on relevant words",
-      "Connecting Arrows"
+      "Title Text: Redis: Your Super-Fast Cache",
+      "Diagram Element: User",
+      "Diagram Element: Web Server",
+      "Diagram Element: Redis Cache (Box with 'Redis')",
+      "Diagram Element: Main Database",
+      "Arrows: Showing data flow direction"
     ]
   },
   {
     "animationTypes": [
       "Write",
-      "Transform",
-      "FadeIn"
+      "FadeIn",
+      "Create"
     ],
     "colorScheme": {
-      "background": "#1A1A2E",
-      "highlights": "#4D7FFF",
-      "text": "#FFFFFF"
+      "background": "#121212",
+      "highlights": "#BA68C8",
+      "text": "#E0E0E0"
     },
-    "instruction": "Explain the Self-Attention mechanism. Show an input word embedding splitting into three distinct vectors: Query (Q), Key (K), and Value (V). Label each vector clearly.",
-    "sceneTitle": "Self-Attention: Q, K, V Vectors",
+    "instruction": "Briefly explain Redis's core data model: key-value pairs. Show simple examples of data stored.",
+    "sceneTitle": "How Redis Stores Data",
+    "script": "Display the title 'How Redis Stores Data'. Explain 'Key-Value Store'. Show examples appearing on screen: Text 'user:1' (key) with Text 'Alice' (value) next to it. Another example: Text 'session:xyz' (key) with a simple JSON-like object (value). Briefly mention other structures like lists or sets with simple visual representations if time permits.",
     "sequence": 4,
     "visualElements": [
-      "Text: 'Self-Attention'",
-      "Input Word Representation (Box/Circle)",
-      "Arrows splitting into Q, K, V vectors",
-      "Labels: 'Query (Q)', 'Key (K)', 'Value (V)'"
+      "Title Text: How Redis Stores Data",
+      "Text: Key-Value Store",
+      "Visual: Key 'user:1' -> Value 'Alice'",
+      "Visual: Key 'session:xyz' -> Value { ... }",
+      "Visual: Simple List representation"
     ]
   },
   {
     "animationTypes": [
-      "Create",
-      "Transform"
+      "Write",
+      "FadeIn",
+      "Transform",
+      "DrawBorder"
     ],
     "colorScheme": {
-      "background": "#1A1A2E",
-      "highlights": "#4D7FFF",
+      "background": "#121212",
+      "highlights": "#F06292",
       "text": "#FFFFFF"
     },
-    "instruction": "Demonstrate how attention scores are calculated. Show the Query vector of one word interacting (dot product) with the Key vectors of all words in the sequence. Visualize this interaction, perhaps with lines connecting Q to each K, possibly showing a similarity score calculation.",
-    "sceneTitle": "Calculating Attention Scores",
+    "instruction": "Illustrate a real-world example of using Redis for caching a social media feed.",
+    "sceneTitle": "Example: Social Media Feed",
+    "script": "Show the title 'Example: Social Media Feed'. Display a simplified mobile feed UI mockup (scrolling posts). Show the app fetching feed data. Then, show Redis storing a pre-rendered version of the feed. When the user refreshes, the data is served quickly from Redis. Use arrows to show the data flow, emphasizing the path through Redis for speed. Add text like 'Reduced Load on Database'.",
     "sequence": 5,
     "visualElements": [
-      "Q Vector",
-      "K Vectors (for all words)",
-      "Visualisation of Dot Product (e.g., lines with weights)",
-      "Text: 'Score = Q * K^T'"
+      "Title Text: Example: Social Media Feed",
+      "Visual: Mockup of a social media feed",
+      "Visual: Redis storing feed data (key: 'feed:user1')",
+      "Animation: Arrow showing fast retrieval from Redis",
+      "Text: Faster Feed Loading"
     ]
   },
   {
     "animationTypes": [
-      "Transform",
-      "FadeIn"
+      "Write",
+      "FadeIn",
+      "Transform"
     ],
     "colorScheme": {
-      "background": "#1A1A2E",
-      "highlights": "#FFD700",
-      "text": "#FFFFFF"
+      "background": "#121212",
+      "highlights": "#FF8A65",
+      "text": "#E0E0E0"
     },
-    "instruction": "Explain the normalization step. Show the calculated scores being scaled (mention scaling factor briefly, e.g., divided by sqrt(d_k)) and then passed through a Softmax function. Visualize the scores transforming into probability weights (summing to 1).",
-    "sceneTitle": "Normalization with Softmax",
+    "instruction": "Provide another real-world example, such as caching product details or user sessions in e-commerce.",
+    "sceneTitle": "Example: E-commerce",
+    "script": "Display the title 'Example: E-commerce'. Show a simplified product page. Demonstrate fetching product details from a main database. Then, show Redis caching these details (e.g., key: 'product:123'). When another user views the same product, the details are served rapidly from Redis. Briefly show a user session being stored and retrieved from Redis, highlighting improved login/session management speed.",
     "sequence": 6,
     "visualElements": [
-      "Attention Scores",
-      "Scaling Operation Visualisation",
-      "Softmax Function Visualisation",
-      "Output: Attention Weights (probabilities)"
+      "Title Text: Example: E-commerce",
+      "Visual: Mockup of a product detail page",
+      "Visual: Redis caching product details",
+      "Visual: User session data in Redis",
+      "Text: Quick Product Views",
+      "Text: Stable User Sessions"
     ]
   },
   {
     "animationTypes": [
-      "Transform",
-      "Create"
+      "Write",
+      "FadeIn",
+      "GrowFromCenter"
     ],
     "colorScheme": {
-      "background": "#1A1A2E",
-      "highlights": "#4D7FFF",
+      "background": "#121212",
+      "highlights": "#4FC3F7",
       "text": "#FFFFFF"
     },
-    "instruction": "Show the final step of self-attention. Multiply the attention weights by their corresponding Value vectors. Sum these weighted Value vectors to produce the final output vector for the initial word, representing its context-aware embedding.",
-    "sceneTitle": "Weighted Sum of Values",
+    "instruction": "Summarize the key benefits of using Redis for caching: speed, reduced database load, and improved scalability.",
+    "sceneTitle": "Why Redis for Caching?",
+    "script": "Show the title 'Why Redis for Caching?'. Present three key benefits as distinct points, perhaps with icons: 1. Blazing Speed (Icon: Speedometer). 2. Reduced Database Load (Icon: Database with down arrow). 3. Scalability (Icon: Growing graph). Briefly elaborate on each point with concise text.",
     "sequence": 7,
     "visualElements": [
-      "Attention Weights",
-      "Value Vectors (V)",
-      "Multiplication Operation (Weights * V)",
-      "Summation Operation",
-      "Output: Contextualized Word Embedding"
+      "Title Text: Why Redis for Caching?",
+      "Point 1: Blazing Speed (with Speedometer Icon)",
+      "Point 2: Reduced Database Load (with DB Icon)",
+      "Point 3: Scalability (with Graph Icon)"
     ]
   },
   {
     "animationTypes": [
       "Write",
-      "Transform"
+      "FadeIn"
     ],
     "colorScheme": {
-      "background": "#1A1A2E",
-      "highlights": "#4D7FFF",
+      "background": "#121212",
+      "highlights": "#81C784",
       "text": "#FFFFFF"
     },
-    "instruction": "Introduce Multi-Head Attention. Explain that the Q, K, V process happens multiple times in parallel, each 'head' focusing on different aspects of the sequence relationships. Show the parallel paths and the final concatenation/projection.",
-    "sceneTitle": "Multi-Head Attention",
+    "instruction": "Conclude the video by summarizing the main points: Redis is a fast in-memory database often used for caching to improve application performance.",
+    "sceneTitle": "Summary & Key Takeaways",
+    "script": "Display the title 'Summary'. Briefly recap: Redis is an in-memory data store. It excels at caching. Caching makes applications faster and reduces database strain. Show the Redis logo one last time. End with a concluding text like 'Boost Your Application Performance!'.",
     "sequence": 8,
     "visualElements": [
-      "Text: 'Multi-Head Attention'",
-      "Visual: Multiple parallel Q, K, V calculations",
-      "Concatenation of results",
-      "Final Projection Layer"
-    ]
-  },
-  {
-    "animationTypes": [
-      "Create",
-      "Write"
-    ],
-    "colorScheme": {
-      "background": "#1A1A2E",
-      "highlights": "#4D7FFF",
-      "text": "#FFFFFF"
-    },
-    "instruction": "Describe the Encoder block. Show its components: Multi-Head Attention layer, followed by Add & Norm, then a Feed-Forward Network, and another Add & Norm layer. Indicate that multiple such blocks are typically stacked.",
-    "sceneTitle": "The Encoder Block",
-    "sequence": 9,
-    "visualElements": [
-      "Diagram: 'Encoder Block'",
-      "Component 1: Multi-Head Attention",
-      "Component 2: Add & Norm",
-      "Component 3: Feed-Forward Network",
-      "Component 4: Add & Norm",
-      "Text: 'Stackable Layers'"
-    ]
-  },
-  {
-    "animationTypes": [
-      "Create",
-      "Write"
-    ],
-    "colorScheme": {
-      "background": "#1A1A2E",
-      "highlights": "#FFD700",
-      "text": "#FFFFFF"
-    },
-    "instruction": "Describe the Decoder block. Show its components: Masked Multi-Head Attention (preventing looking ahead), Add & Norm, Encoder-Decoder Attention (attending to encoder output), Add & Norm, Feed-Forward, Add & Norm. Indicate stacking.",
-    "sceneTitle": "The Decoder Block",
-    "sequence": 10,
-    "visualElements": [
-      "Diagram: 'Decoder Block'",
-      "Component 1: Masked Multi-Head Attention",
-      "Component 2: Add & Norm",
-      "Component 3: Encoder-Decoder Attention",
-      "Component 4: Add & Norm",
-      "Component 5: Feed-Forward Network",
-      "Component 6: Add & Norm",
-      "Text: 'Stackable Layers'"
-    ]
-  },
-  {
-    "animationTypes": [
-      "Write",
-      "Transform"
-    ],
-    "colorScheme": {
-      "background": "#1A1A2E",
-      "highlights": "#4D7FFF",
-      "text": "#FFFFFF"
-    },
-    "instruction": "Address the lack of sequential information in pure self-attention. Explain Positional Encoding: adding vectors that represent the position of each word in the sequence to the input embeddings. Show a visual representation.",
-    "sceneTitle": "Positional Encoding",
-    "sequence": 11,
-    "visualElements": [
-      "Text: 'Handling Word Order: Positional Encoding'",
-      "Input Embedding + Positional Encoding Vector = Final Input",
-      "Visual: Sine/Cosine waves or simple positional vectors"
-    ]
-  },
-  {
-    "animationTypes": [
-      "Write",
-      "Create"
-    ],
-    "colorScheme": {
-      "background": "#1A1A2E",
-      "highlights": "#4D7FFF",
-      "text": "#FFFFFF"
-    },
-    "instruction": "Show the complete Transformer architecture. Connect the input processing (embeddings + positional encoding), the stack of Encoder blocks, the stack of Decoder blocks, and the final output layer (e.g., a linear layer followed by Softmax for prediction).",
-    "sceneTitle": "The Full Transformer Model",
-    "sequence": 12,
-    "visualElements": [
-      "Diagram: Encoder Stack",
-      "Diagram: Decoder Stack",
-      "Input Layer (Embeddings + Positional Encoding)",
-      "Output Layer (Linear + Softmax)",
-      "Arrows showing data flow"
-    ]
-  },
-  {
-    "animationTypes": [
-      "Write",
-      "FadeIn"
-    ],
-    "colorScheme": {
-      "background": "#1A1A2E",
-      "highlights": "#FFD700",
-      "text": "#FFFFFF"
-    },
-    "instruction": "List key applications where Transformers excel. Use icons or short text labels for examples like Machine Translation, Text Summarization, Question Answering, Chatbots, and even Computer Vision tasks.",
-    "sceneTitle": "Applications of Transformers",
-    "sequence": 13,
-    "visualElements": [
-      "Text: 'Applications'",
-      "Icon/Label: Machine Translation",
-      "Icon/Label: Text Summarization",
-      "Icon/Label: Chatbots / Language Models",
-      "Icon/Label: Computer Vision (Optional)"
-    ]
-  },
-  {
-    "animationTypes": [
-      "Write",
-      "FadeIn"
-    ],
-    "colorScheme": {
-      "background": "#1A1A2E",
-      "highlights": "#4D7FFF",
-      "text": "#FFFFFF"
-    },
-    "instruction": "Conclude by summarizing the key takeaway: Self-Attention allows models to weigh the importance of different input parts, overcoming RNN limitations. Reiterate the significance and widespread use of Transformers.",
-    "sceneTitle": "Conclusion and Impact",
-    "sequence": 14,
-    "visualElements": [
-      "Text: 'Summary: Self-Attention is Key!'",
-      "Text: 'Transformers revolutionized NLP and beyond.'",
-      "Final graphic of the Transformer Architecture (simplified)"
+      "Title Text: Summary",
+      "Text: Redis = Fast In-Memory Store",
+      "Text: Caching improves performance",
+      "Text: Reduces DB load",
+      "Logo: Redis",
+      "Final Text: Boost Your Application Performance!"
     ]
   }
 ]`)
 
 	json.Unmarshal(jsonData, &scenes)
 
-	for _, scene := range scenes {
+	var previousCode string
 
-		res, _ := utils.GenerateCode(scene, scenes)
+	for _, scene := range scenes {
+		res, _ := utils.GenerateCode(scene, scenes, previousCode)
 		fmt.Println(res.SceneTitle)
 		// save to file
 		utils.WriteToFile(res.ClassName, res.Code)
@@ -322,6 +224,10 @@ func main() {
 			fmt.Println("Fixing 🔴", res.ClassName)
 			utils.FixCode(fmt.Sprintf("%+v", err), *res)
 		}
+
+		pCode, _ := utils.ReadFile(res.ClassName)
+		previousCode = *pCode
+
 	}
 
 }
