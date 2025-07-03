@@ -1,6 +1,7 @@
 "use client";
 import { Button } from "@/components/ui/button";
 import { createProject } from "@/handler/project-apis";
+import { useRouter } from "next/navigation";
 
 import React, { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
@@ -9,7 +10,7 @@ function PromptInput({ userName }: { userName: string }) {
   const [isInputActive, setIsInputActive] = useState(true);
   const [disableSubmit, setSubmitDisable] = useState(false);
   const [prompt, setPrompt] = useState("");
-
+  const router = useRouter();
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -32,9 +33,11 @@ function PromptInput({ userName }: { userName: string }) {
     try {
       setSubmitDisable(true);
       const res = await createProject(prompt);
+      localStorage.setItem(res.data.id, JSON.stringify(res.plan));
+      router.push(`/p/${res.data.id}`);
       toast.success(res.message);
     } catch (error: any) {
-      toast.success(error.message);
+      toast.error(error.message);
     } finally {
       setSubmitDisable(false);
     }

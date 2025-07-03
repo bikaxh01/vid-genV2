@@ -4,15 +4,18 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	"log"
 	"os"
 
-	"os/exec"
-	"path/filepath"
-
+	"github.com/anthropics/anthropic-sdk-go"
+	"github.com/anthropics/anthropic-sdk-go/option"
 	"github.com/bikaxh/vid-gen/generator/pkg/prompts"
 	"github.com/joho/godotenv"
-	"google.golang.org/genai"
+	
+
+	"os/exec"
+	"path/filepath"
 )
 
 type SceneGeneration struct {
@@ -22,55 +25,31 @@ type SceneGeneration struct {
 	SceneTitle  string `json:"sceneTitle"`
 }
 
-func GenerateCode(sceneMetadata prompts.Scene, scenes prompts.Scenes,previousCode string) (*SceneGeneration, error) {
-  
-	ctx := context.Background()
-	client, err := genai.NewClient(ctx, &genai.ClientConfig{
-		APIKey:  GoDotEnvVariable("GEMINI_API_KEY"),
-		Backend: genai.BackendGeminiAPI,
+func GenerateCode(sceneMetadata prompts.Scene, scenes prompts.Scenes, previousCode string) (*SceneGeneration, error) {
+
+	client := anthropic.NewClient(
+		option.WithAPIKey(GoDotEnvVariable("ANTHROPIC_API_KEY")),
+	)
+	message, err := client.Messages.New(context.TODO(), anthropic.MessageNewParams{
+		MaxTokens: 3024,
+		System: []anthropic.TextBlockParam{
+			{Text: prompts.GetSceneGenerationSystemPrompt(scenes)},
+		},
+		Messages: []anthropic.MessageParam{{
+			Content: []anthropic.ContentBlockParamUnion{{
+				OfText: &anthropic.TextBlockParam{Text: prompts.GetSceneGenerationUserPrompt(previousCode, sceneMetadata)},
+			}},
+			Role: anthropic.MessageParamRoleUser,
+		}},
+		Model: anthropic.ModelClaudeOpus4_0,
 	})
 	if err != nil {
-		log.Fatal(err)
+		panic(err.Error())
 	}
-
-	config := &genai.GenerateContentConfig{
-		ResponseMIMEType: "application/json",
-		ResponseSchema: &genai.Schema{
-			Type:        genai.TypeObject,
-			Description: "Detail of scene",
-			Properties: map[string]*genai.Schema{
-				"sceneTitle": {
-					Type:        genai.TypeString,
-					Description: "The title of the scene, describing the main focus or idea.",
-				},
-				"description": {
-					Type:        genai.TypeString,
-					Description: "A detailed explanation of what happens in the scene.",
-				},
-				"className": {
-					Type:        genai.TypeString,
-					Description: "Name of Class that has been created",
-				},
-				"code": {
-					Type:        genai.TypeString,
-					Description: "scene main code of scene",
-				},
-			},
-			Required: []string{"sceneTitle", "description", "code", "className"},
-		},
-	}
-	result, err := client.Models.GenerateContent(
-		ctx,
-		"gemini-2.0-flash",
-		genai.Text(prompts.GetSceneGenerationPrompt(sceneMetadata, scenes,previousCode)),
-		config,
-	)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	res := []byte(result.Text())
+	
+	result := message.Content[0].Text
+   
+	res := []byte(result)
 
 	var data SceneGeneration
 	err = json.Unmarshal(res, &data)
@@ -146,21 +125,23 @@ func CompileFile(fileName string) (bool, error) {
 
 func FixCode(err string, generatedScene SceneGeneration) {
 
-	history := []*genai.Content{
-		genai.NewContentFromText(prompts.GetFixCodePrompt(), genai.RoleModel),
-	}
+	history := []anthropic.MessageParam{}
+
 	initialCode, _ := ReadFile(generatedScene.ClassName)
-	
+
 	compilationError := err
-	
+
 	currentPrompt := fmt.Sprintf("Compilation err: ###\n %v \n### current code : ###\n %v \n###", compilationError, *initialCode)
-	
-	for i := range 5 {
-		fmt.Println("Fixing for 🟢", i)
-		
-		fmt.Println("Fixing for 🟢", *initialCode)
+
+	for range 5 {
+		fmt.Println("Fixing", generatedScene.SceneTitle)
+		history = append(history, anthropic.MessageParam{Content: []anthropic.ContentBlockParamUnion{{OfText: &anthropic.TextBlockParam{
+			Text: currentPrompt,
+		}}},
+			Role: anthropic.MessageParamRoleUser,
+		})
 		//pass to llm
-		fixedCode := FixCodeLLM(history, currentPrompt)
+		fixedCode := FixCodeLLM(history)
 
 		//save code to file
 		WriteToFile(generatedScene.ClassName, fixedCode)
@@ -171,12 +152,20 @@ func FixCode(err string, generatedScene SceneGeneration) {
 			compilationError = fmt.Sprintf("%+v", cErr)
 		}
 		initialCode, _ = ReadFile(generatedScene.ClassName)
+
 		if success == true {
+		fmt.Printf("History: %+v\n", history)
 			fmt.Println("successfully fixed 🟢", generatedScene.SceneTitle)
-			break
+			return
 		}
-		history = append(history, genai.NewContentFromText(*initialCode, genai.RoleModel))
+		history = append(history, anthropic.MessageParam{Content: []anthropic.ContentBlockParamUnion{{OfText: &anthropic.TextBlockParam{
+			Text: *initialCode,
+		}}},
+			Role: anthropic.MessageParamRoleAssistant,
+		})
 	}
+
+	fmt.Println("Unable to fix 🔴", generatedScene.SceneTitle)
 
 }
 
@@ -194,35 +183,23 @@ func ReadFile(fileName string) (*string, error) {
 	return &data, nil
 }
 
-func FixCodeLLM(history []*genai.Content, currentPrompt string) string {
+func FixCodeLLM(history []anthropic.MessageParam) string {
 
-	ctx := context.Background()
-	client, err := genai.NewClient(ctx, &genai.ClientConfig{
-		APIKey: GoDotEnvVariable("GEMINI_API_KEY"),
+	client := anthropic.NewClient(
+		option.WithAPIKey(GoDotEnvVariable("ANTHROPIC_API_KEY")),
+	)
+	message, err := client.Messages.New(context.TODO(), anthropic.MessageNewParams{
+		MaxTokens: 3024,
+		System: []anthropic.TextBlockParam{
+			{Text: prompts.GetFixCodePrompt()},
+		},
+		Messages: history,
+		Model:    anthropic.ModelClaudeOpus4_0,
 	})
 	if err != nil {
-		log.Fatal(err)
+		panic(err.Error())
 	}
-
-	config := &genai.GenerateContentConfig{
-		ResponseMIMEType: "application/json",
-		ResponseSchema: &genai.Schema{
-			Type:        genai.TypeObject,
-			Description: "Fixed code of scene",
-			Properties: map[string]*genai.Schema{
-				"code": {
-					Type:        genai.TypeString,
-					Description: "Fixed code of scene",
-				},
-			},
-			Required: []string{"code"},
-		},
-	}
-
-	chat, _ := client.Chats.Create(ctx, "gemini-2.5-flash", config, history)
-	res, _ := chat.SendMessage(ctx, genai.Part{Text: currentPrompt})
-
-	result := res.Candidates[0].Content.Parts[0].Text
+	result := message.Content[0].Text
 
 	bytTxt := []byte(result)
 

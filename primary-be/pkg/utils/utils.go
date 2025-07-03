@@ -148,7 +148,7 @@ func GeneratePlan(prompt string) (map[string]any, error) {
 								Type:        genai.TypeString,
 								Description: "The in detail script  for  the scene.",
 							},
-							"instruction": {
+							"description": {
 								Type:        genai.TypeString,
 								Description: "A detailed explanation of what happens in the scene.",
 							},
@@ -192,7 +192,7 @@ func GeneratePlan(prompt string) (map[string]any, error) {
 						},
 						Required: []string{
 							"sceneTitle",
-							"instruction",
+							"description",
 							"visualElements",
 							"colorScheme",
 							"script",

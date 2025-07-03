@@ -22,7 +22,7 @@ Each scene must include the following fields:
 
 - **sceneTitle**  - Title of scene
 - **sequence**-  (e.g., 1, 2, 3...)  
-- **instruction** – Explain what happens in the scene (what is taught, and how it's visualized).  
+- **description** – Description about  the scene (About scene).  
 - **script**   - In detail explanation of what the scene should contain the final output of the scene 
 - **visualElements** – Mention key objects like text, arrows, graphs, equations, or shapes.  
 - **colorScheme** – Use a simple, cohesive palette (no names, use hex codes like #FFFFFF)  
@@ -42,17 +42,6 @@ Each scene must include the following fields:
 - Avoid heavy or distracting transitions; clarity comes first.
 
 ---
-
-**Scene Format Example**:
-
-- **sceneTitle**: Introduction to Newton’s Laws  
-*sequence*: 1  
-*instruction*: Display the title “Newton’s Laws of Motion” in the center. The background fades to a soft blue tone, creating an inviting start to the video.  
-  *Visual and Animation Elements*: Centered title text, soft background fade  
-  *colorScheme*: #0A0A23 (background), #FFFFFF (text)  
-  *animationTypes*: Write, FadeIn
-  
-  ---
   
   **User Input Prompt**:
 The user’s prompt will appear in the following format:

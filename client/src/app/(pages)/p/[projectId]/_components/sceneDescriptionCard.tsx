@@ -1,5 +1,5 @@
-"use client"
-import React, { useState } from "react";
+"use client";
+import React from "react";
 import {
   Accordion,
   AccordionContent,
@@ -9,17 +9,23 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+export interface HandleSceneChangeProp {
+  title: string;
+  description: string;
+  sequence: number;
+}
+
 function SceneDescriptionCard({
   title,
   description,
   sequence,
+  handleSceneChange,
 }: {
   title: string;
   description: string;
   sequence: number;
+  handleSceneChange: (data: HandleSceneChangeProp) => void;
 }) {
-
-  const [input,setInput] = useState("title")
   return (
     <div>
       <Accordion type="single" collapsible>
@@ -35,11 +41,31 @@ function SceneDescriptionCard({
           <AccordionContent className=" flex flex-col gap-2 ">
             <div className=" flex flex-col gap-1">
               <Label>Title</Label>
-              <Input value={input} onChange={(e)=>setInput(e.target.value)} className="!text-xs" />
+              <Input
+                value={title}
+                onChange={(e) =>
+                  handleSceneChange({
+                    title: e.target.value,
+                    description: description,
+                    sequence,
+                  })
+                }
+                className="!text-xs"
+              />
             </div>
             <div className=" flex-col flex gap-1">
               <Label>Description</Label>
-              <Input value={description} className=" !text-xs" />
+              <Input
+                value={description}
+                className=" !text-xs"
+                onChange={(e) =>
+                  handleSceneChange({
+                    title: title,
+                    description: e.target.value,
+                    sequence,
+                  })
+                }
+              />
             </div>
           </AccordionContent>
         </AccordionItem>

@@ -14,7 +14,25 @@ export async function createProject(prompt: string) {
     );
 
     return res.data;
-  } catch (error:any) {
+  } catch (error: any) {
+    throw new Error(error.response.data.message || "something went wrong");
+  }
+}
+
+export async function handleGenerateScenes(projectMetaData: any) {
+  try {
+    const res = await axios.post(
+      `${BASE_URL}project/generate-scenes`,
+      {
+        ...projectMetaData,
+      },
+      {
+        withCredentials: true,
+      }
+    );
+
+    return res.data;
+  } catch (error: any) {
     throw new Error(error.response.data.message || "something went wrong");
   }
 }
