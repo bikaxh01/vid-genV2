@@ -1,10 +1,10 @@
 package handler
 
 import (
+	"fmt"
 	"github.com/bikaxh/vid-gen/primary-be/pkg/model"
 	"github.com/bikaxh/vid-gen/primary-be/pkg/utils"
 	"github.com/gofiber/fiber/v2"
-	"fmt"
 )
 
 func CreateProjectHandler(c *fiber.Ctx) error {
@@ -44,7 +44,7 @@ func GenerateScenesHandler(c *fiber.Ctx) error {
 	err := c.BodyParser(&project)
 
 	if err != nil {
-		fmt.Println("🔴",err)
+		fmt.Println("🔴", err)
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"message": "Invalid request body"})
 	}
 	// save to db
@@ -64,4 +64,33 @@ func GenerateScenesHandler(c *fiber.Ctx) error {
 		"message": "Generating scenes",
 		"data":    p,
 	})
+}
+
+func CreateSceneHandler(c *fiber.Ctx) error {
+
+	projectId := c.Params("projectId")
+
+	var scene model.Scene
+	err := c.BodyParser(&scene)
+	
+	fmt.Println("REqu body 🟢",scene)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "Invalid req body",
+		})
+	}
+
+	s, err := scene.SaveScene(projectId)
+
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"message": "something went wrong",
+		})
+	}
+
+		return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
+		"message": "scene created",
+		"data":    s,
+	})
+
 }

@@ -33,6 +33,7 @@ func main() {
 	projectRouter.Post("/create-project", handler.CreateProjectHandler)
 	projectRouter.Post("/generate-scenes", handler.GenerateScenesHandler)
 
+	app.Post("/create-scene/:projectId",handler.CreateSceneHandler)
 	app.Listen(":8000")
 
 }

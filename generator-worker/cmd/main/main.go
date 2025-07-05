@@ -3,6 +3,9 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
+	"sync"
 
 	"github.com/bikaxh/vid-gen/generator/pkg/prompts"
 	"github.com/bikaxh/vid-gen/generator/pkg/utils"
@@ -1326,17 +1329,74 @@ class S06_ConclusionAndNextSteps(Scene):
 	// 	fmt.Println("🟢 Code Generated For ", res.SceneTitle)
 	// }
 
-	for _, sc := range generatedScenesMetaData {
+	var wg sync.WaitGroup
+	// save to db
+	projectId := "d8edb8b7-fd24-4678-b37a-a7835e94188e"
+	saveToDbCh := make(chan string)
 
-		func() {
-    fmt.Println("🟢 Compiling For ", sc.SceneTitle)
-			_, err := utils.CompileFile(sc.ClassName)
-			if err != nil {
-				fmt.Println("Fixing 🔴", sc.ClassName)
-				utils.FixCode(fmt.Sprintf("%+v", err), sc)
-			}
-		}()
+	for _, sc := range generatedScenesMetaData {
+		wg.Add(1)
+		go func(ch chan<- string, wg *sync.WaitGroup) {
+			defer wg.Done()
+			utils.SaveSceneToDb(sc, projectId)
+			ch <- fmt.Sprintf("Saved to db ")
+		}(saveToDbCh, &wg)
 	}
 
+	go func() {
+		wg.Wait()
+		close(saveToDbCh)
+	}()
+
+	for result := range saveToDbCh {
+		fmt.Println(result)
+	}
+
+	wg = sync.WaitGroup{} // reset wg
+	compileCh := make(chan string)
+
+	// compile scenes
+	for _, sc := range generatedScenesMetaData {
+
+		wg.Add(1)
+
+		FFMPEGFilePath := filepath.Join("..", "..", "final", "ffmpeg"+".txt")
+		absolutePath, _ := filepath.Abs(FFMPEGFilePath)
+
+		file, _ := os.OpenFile(absolutePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+
+		go func(ch chan<- string, wg *sync.WaitGroup) {
+			defer wg.Done()
+			filepath, err := utils.CompileFile(sc.ClassName)
+
+			if err != nil {
+				fmt.Println("Fixing 🔴", sc.ClassName)
+				fmt.Println("Fixing 🔴", err)
+				// utils.FixCode(fmt.Sprintf("%+v", err), sc)
+			}
+
+			// write ffmped file
+			pathToBeWritten := fmt.Sprintf("file '%s'\n", *filepath)
+			file.WriteString(pathToBeWritten)
+			file.Close()
+			ch <- fmt.Sprintf("Compilation completed %v", sc.SceneTitle)
+
+		}(compileCh, &wg)
+
+	}
+
+	go func() {
+		wg.Wait()
+		close(compileCh)
+	}()
+
+	for result := range compileCh {
+		fmt.Println(result)
+	}
+
+    // concat all scenes
+
+	// upload final file
+	// store to db
 
 }

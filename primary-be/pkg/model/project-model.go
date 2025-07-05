@@ -1,8 +1,6 @@
 package model
 
 import (
-	
-
 	"github.com/bikaxh/vid-gen/primary-be/pkg/db"
 	"github.com/google/uuid"
 	"gorm.io/datatypes"
@@ -31,13 +29,13 @@ type Project struct {
 }
 
 type Scene struct {
-	ID          string `gorm:"type:uuid;primaryKey" json:"id"`
-	ProjectId   string `gorm:"type:uuid" json:"projectId"`
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	Code        string `json:"code"`
-	FileKey     string `json:"fileKey"`
-	VideoUrl    string `json:"videoUrl"`
+	ID          string  `gorm:"type:uuid;primaryKey" json:"id"`
+	ProjectId   string  `gorm:"type:uuid" json:"projectId"`
+	Title       string  `json:"title"`
+	Description string  `json:"description"`
+	Code        string  `json:"code"`
+	FileKey     *string `json:"fileKey,omitempty"`
+	VideoUrl    *string `json:"videoUrl,omitempty"`
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
 }
@@ -75,4 +73,16 @@ func (p *Project) SavePlan() (*Project, error) {
 	}
 
 	return p, nil
+}
+
+func (s *Scene) SaveScene(projectId string) (*Scene, error) {
+	s.ID = uuid.New().String()
+	s.ProjectId = projectId
+
+	result := db.Db.Create(s)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return s, nil
+
 }
