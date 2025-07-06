@@ -10,6 +10,7 @@ import (
 
 	"context"
 
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/joho/godotenv"
 	"golang.org/x/crypto/bcrypt"
@@ -228,3 +229,4 @@ func GeneratePlan(prompt string) (map[string]any, error) {
 	return data, nil
 
 }
+

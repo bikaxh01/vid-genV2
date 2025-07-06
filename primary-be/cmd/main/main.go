@@ -34,6 +34,7 @@ func main() {
 	projectRouter.Post("/generate-scenes", handler.GenerateScenesHandler)
 
 	app.Post("/create-scene/:projectId",handler.CreateSceneHandler)
+	app.Post("/save-video/:projectId",handler.SaveVideoUrlHandler)
 	app.Listen(":8000")
 
 }

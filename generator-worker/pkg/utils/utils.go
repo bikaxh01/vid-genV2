@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"path"
 
 	"net/http"
 
@@ -14,6 +15,11 @@ import (
 	"github.com/anthropics/anthropic-sdk-go"
 	"github.com/anthropics/anthropic-sdk-go/option"
 	"github.com/bikaxh/vid-gen/generator/pkg/prompts"
+	"github.com/cloudinary/cloudinary-go/v2"
+	"github.com/redis/go-redis/v9"
+
+	"github.com/cloudinary/cloudinary-go/v2/api/uploader"
+
 	"github.com/joho/godotenv"
 
 	"os/exec"
@@ -21,7 +27,7 @@ import (
 )
 
 type SceneGeneration struct {
-	ClassName   string `json:"fileKey"`
+	ClassName   string `json:"className"`
 	Code        string `json:"code"`
 	Description string `json:"description"`
 	SceneTitle  string `json:"title"`
@@ -52,7 +58,6 @@ func GenerateCode(sceneMetadata prompts.Scene, scenes prompts.Scenes, previousCo
 	result := message.Content[0].Text
 
 	res := []byte(result)
-
 	var data SceneGeneration
 	err = json.Unmarshal(res, &data)
 
@@ -60,6 +65,9 @@ func GenerateCode(sceneMetadata prompts.Scene, scenes prompts.Scenes, previousCo
 		fmt.Println("🔴", err)
 		return nil, err
 	}
+
+	fmt.Println("LLM Res", result)
+	fmt.Println("parsed Res", *&data)
 
 	// save to db
 	return &data, nil
@@ -239,4 +247,102 @@ func SaveSceneToDb(scene SceneGeneration, projectId string) {
 
 }
 
+func ConcatUpload(projectId string) error {
 
+	mediaDirPath := filepath.Join("..", "..", "final")
+	mediaAbsolutePath, _ := filepath.Abs(mediaDirPath)
+
+	// concat all
+	//ffmpeg -f concat -safe 0 -i ffmpeg.txt -c copy ./final.mp4
+	concatFilePath := filepath.Join(mediaAbsolutePath, "ffmpeg.txt")
+	finalOutputPath := filepath.Join(mediaDirPath, projectId+".mp4")
+
+	cmd := exec.Command("ffmpeg", "-f", "concat", "-safe", "0", "-i", concatFilePath, "-c", "copy", finalOutputPath)
+	_, err := cmd.CombinedOutput()
+
+	if err != nil {
+
+		fmt.Println(err.Error())
+		return err
+	}
+	// upload
+
+	cld, _ := cloudinary.NewFromURL(GoDotEnvVariable("CLOUDINARY_URL"))
+
+	cld.Config.URL.Secure = true
+	ctx := context.Background()
+
+	res, err := cld.Upload.Upload(ctx, finalOutputPath, uploader.UploadParams{
+		Folder:       "manimate",
+		ResourceType: "video",
+	})
+
+	if err != nil {
+		fmt.Println("🔴🔴", err)
+
+	}
+
+	// save video url
+	reqBody := make(map[string]string)
+	reqBody["videoUrl"] = res.SecureURL
+
+	url := fmt.Sprintf("%s/save-video/%s", GoDotEnvVariable("PRIMARY_SERVER"), projectId)
+
+	json, _ := json.Marshal(reqBody)
+
+	response, _ := http.Post(url, "application/json", bytes.NewBuffer(json))
+
+	defer response.Body.Close()
+	return nil
+
+}
+
+var RedisClient *redis.Client
+
+func ConnectRedisClient() {
+
+	RedisClient = redis.NewClient(&redis.Options{
+		Addr:     GoDotEnvVariable("REDIS_URL"),
+		Password: "",
+		DB:       0,
+	})
+
+	ctx := context.Background()
+	_, err := RedisClient.Ping(ctx).Result()
+	if err != nil {
+		panic(fmt.Sprintf("Failed to connect to Redis: %v", err))
+	}
+
+	fmt.Println("🟢 Connected to Redis")
+
+}
+
+func CleanResources() {
+	fmt.Println("Clenaing")
+	rootDirPath := filepath.Join("..", "..", "final")
+	rootDirAbsolutePath, _ := filepath.Abs(rootDirPath)
+	err := os.RemoveAll(rootDirAbsolutePath)
+	if err != nil {
+		fmt.Println("Error removing directory:", err)
+	} else {
+		fmt.Println("Directory removed successfully")
+	}
+
+	err = os.MkdirAll(rootDirAbsolutePath, 0755)
+	err = os.MkdirAll(path.Join(rootDirAbsolutePath, "code"), 0755)
+	err = os.MkdirAll(path.Join(rootDirAbsolutePath, "final"), 0755)
+}
+
+func WriteFFMPEGFile(className string) {
+	FFMPEGFilePath := filepath.Join("..", "..", "final", "ffmpeg"+".txt")
+	absolutePath, _ := filepath.Abs(FFMPEGFilePath)
+	file, _ := os.OpenFile(absolutePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	mediaDirPath := filepath.Join("..", "..", "final", "media")
+	mediaAbsolutePath, _ := filepath.Abs(mediaDirPath)
+	videoPath := filepath.Join(mediaAbsolutePath, "videos", className, "1080p60", className+".mp4")
+
+	pathToBeWritten := fmt.Sprintf("file '%s'\n", *&videoPath)
+
+	file.WriteString(pathToBeWritten)
+	file.Close()
+}

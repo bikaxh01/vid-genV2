@@ -1,10 +1,14 @@
 package model
 
 import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"time"
+
 	"github.com/bikaxh/vid-gen/primary-be/pkg/db"
 	"github.com/google/uuid"
 	"gorm.io/datatypes"
-	"time"
 )
 
 type Status string
@@ -13,6 +17,7 @@ const (
 	PLAN_GENERATING   Status = "generating_plan"
 	GENERATING_SCENES Status = "generating_scenes"
 	VIDEO_MERGING     Status = "video_merging"
+	COMPLETED         Status = "completed"
 )
 
 type Project struct {
@@ -22,10 +27,12 @@ type Project struct {
 	Title       string         `json:"title"`
 	Description string         `json:"description"`
 	Plan        datatypes.JSON `json:"plan"`
-	Status      Status         `json:"status"`
-	Scenes      []Scene        `gorm:"foreignKey:ProjectId" json:"scenes"`
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
+
+	Status    Status  `json:"status"`
+	VideoUrl  *string `json:"videoUrl,omitempty"`
+	Scenes    []Scene `gorm:"foreignKey:ProjectId" json:"scenes"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 type Scene struct {
@@ -75,6 +82,18 @@ func (p *Project) SavePlan() (*Project, error) {
 	return p, nil
 }
 
+func (p *Project) SaveVideoUrl() error {
+
+	// result := db.Db.Model(p).Where("id = ?", p.ID).UpdateColumn("video_url", p.VideoUrl)
+	result := db.Db.Model(p).Updates(Project{VideoUrl: p.VideoUrl, Status: COMPLETED})
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}
+
 func (s *Scene) SaveScene(projectId string) (*Scene, error) {
 	s.ID = uuid.New().String()
 	s.ProjectId = projectId
@@ -85,4 +104,16 @@ func (s *Scene) SaveScene(projectId string) (*Scene, error) {
 	}
 	return s, nil
 
+}
+
+func PushToQueue(data Project) {
+	var ctx = context.Background()
+	jsonBytes, err := json.Marshal(data)
+	if err != nil {
+		fmt.Println("Error marshalling to JSON:", err)
+		return
+	}
+	jsonString := string(jsonBytes)
+
+	db.RedisClient.LPush(ctx, "generate_scene", string(jsonString))
 }

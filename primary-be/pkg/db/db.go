@@ -1,9 +1,11 @@
 package db
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/bikaxh/vid-gen/primary-be/pkg/utils"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -21,5 +23,25 @@ func Connect() {
 	}
 
 	fmt.Println("Connected successfully 🟢")
+
+}
+
+var RedisClient *redis.Client
+
+func ConnectRedisClient() {
+
+	RedisClient = redis.NewClient(&redis.Options{
+		Addr:     utils.GoDotEnvVariable("REDIS_URL"),
+		Password: "",
+		DB:       0,
+	})
+
+	ctx := context.Background()
+	_, err := RedisClient.Ping(ctx).Result()
+	if err != nil {
+		panic(fmt.Sprintf("Failed to connect to Redis: %v", err))
+	}
+
+	fmt.Println("🟢 Connected to Redis")
 
 }

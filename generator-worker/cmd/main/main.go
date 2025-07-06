@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -9,14 +10,17 @@ import (
 
 	"github.com/bikaxh/vid-gen/generator/pkg/prompts"
 	"github.com/bikaxh/vid-gen/generator/pkg/utils"
+
 )
 
-func main() {
+func main2() {
 	// get project id
 
 	// get project plan
 
 	// map over it
+
+	// var projectMetaData = make(map[string]string)
 
 	var scenes prompts.Scenes
 
@@ -738,7 +742,7 @@ class S03_HowInformationFlows(Scene):
 			SceneTitle:  "How Information Flows",
 		},
 		{
-			ClassName: "S04_HowNeuralNetworksLearn",
+			ClassName: "S04_HowNeuralNetworksLearnTraining",
 			Code: `from manim import *
 
 class S04_HowNeuralNetworksLearnTraining(Scene):
@@ -1331,7 +1335,7 @@ class S06_ConclusionAndNextSteps(Scene):
 
 	var wg sync.WaitGroup
 	// save to db
-	projectId := "d8edb8b7-fd24-4678-b37a-a7835e94188e"
+	projectId := "18656293-2e68-47dd-8f6c-71c7a7636d4c"
 	saveToDbCh := make(chan string)
 
 	for _, sc := range generatedScenesMetaData {
@@ -1394,9 +1398,125 @@ class S06_ConclusionAndNextSteps(Scene):
 		fmt.Println(result)
 	}
 
-    // concat all scenes
+	utils.ConcatUpload(projectId)
+	// concat all scenes
 
 	// upload final file
 	// store to db
 
+}
+
+func init() {
+	// Connect redis
+	utils.ConnectRedisClient()
+}
+func main() {
+	ctx := context.Background()
+	for {
+
+		fmt.Println("Listing for another 🟢: ")
+		data, err := utils.RedisClient.BRPop(ctx, 0, "generate_scene").Result()
+
+		// Data Parsing
+		var projectMetaData = make(map[string]any)
+		err = json.Unmarshal([]byte(data[1]), &projectMetaData)
+
+		if err != nil {
+
+			fmt.Println("Error occured ", err)
+			return
+		}
+
+		projectId, ok := projectMetaData["id"].(string)
+		if !ok {
+			fmt.Println("id is not a string")
+			return
+		}
+		var scenes prompts.Scenes
+
+		jsonBytes, _ := json.Marshal(projectMetaData["plan"])
+		json.Unmarshal(jsonBytes, &scenes)
+		// Scene Processing
+		var generatedScenesMetaData []utils.SceneGeneration
+		var previousCode string
+
+		for _, scene := range scenes {
+			res, _ := utils.GenerateCode(scene, scenes, previousCode)
+			// fmt.Println("Scene res",res)
+			// save to file
+			utils.WriteToFile(res.ClassName, res.Code)
+			generatedScenesMetaData = append(generatedScenesMetaData, *res)
+			pCode, _ := utils.ReadFile(res.ClassName)
+			previousCode = *pCode
+			fmt.Println("🟢 Code Generated For ", res.SceneTitle)
+		}
+
+		var wg sync.WaitGroup
+
+		// save to db
+		saveToDbCh := make(chan string)
+
+		for _, sc := range generatedScenesMetaData {
+			wg.Add(1)
+			go func(ch chan<- string, wg *sync.WaitGroup) {
+				defer wg.Done()
+				utils.SaveSceneToDb(sc, projectId)
+				ch <- fmt.Sprintf("Saved to db ")
+			}(saveToDbCh, &wg)
+		}
+
+		go func() {
+			wg.Wait()
+			close(saveToDbCh)
+		}()
+
+		for result := range saveToDbCh {
+			fmt.Println(result)
+		}
+
+		wg = sync.WaitGroup{} // reset wg
+		compileCh := make(chan string)
+
+		// compile scenes
+		for _, sc := range generatedScenesMetaData {
+
+			wg.Add(1)
+
+			go func(ch chan<- string, wg *sync.WaitGroup) {
+				defer wg.Done()
+				_, err := utils.CompileFile(sc.ClassName)
+
+				if err != nil {
+					fmt.Println("Fixing 🔴", sc.ClassName)
+					utils.FixCode(fmt.Sprintf("%+v", err), sc)
+				}
+
+				ch <- fmt.Sprintf("Compilation completed %v", sc.SceneTitle)
+
+			}(compileCh, &wg)
+
+		}
+
+		go func() {
+			wg.Wait()
+			close(compileCh)
+		}()
+
+		for result := range compileCh {
+			fmt.Println(result)
+		}
+
+		// write ffmpeg file
+
+		for _, sc := range generatedScenesMetaData {
+
+			utils.WriteFFMPEGFile(sc.ClassName)
+
+		}
+
+		utils.ConcatUpload(projectId)
+
+		// clean the folder
+		utils.CleanResources()
+	}
 }

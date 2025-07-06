@@ -1,6 +1,0 @@
-file 'D:\projects\video-gen-v2\generator-worker\final\media\videos\S01_WhatIsANeuralNetwork\1080p60\S01_WhatIsANeuralNetwork.mp4'
-file 'D:\projects\video-gen-v2\generator-worker\final\media\videos\S02_TheAnatomyOfANeuralNetwork\1080p60\S02_TheAnatomyOfANeuralNetwork.mp4'
-file 'D:\projects\video-gen-v2\generator-worker\final\media\videos\S04_HowNeuralNetworksLearn\1080p60\S04_HowNeuralNetworksLearn.mp4'
-file 'D:\projects\video-gen-v2\generator-worker\final\media\videos\S03_HowInformationFlows\1080p60\S03_HowInformationFlows.mp4'
-file 'D:\projects\video-gen-v2\generator-worker\final\media\videos\S05_RealWorldApplications\1080p60\S05_RealWorldApplications.mp4'
-file 'D:\projects\video-gen-v2\generator-worker\final\media\videos\S06_ConclusionAndNextSteps\1080p60\S06_ConclusionAndNextSteps.mp4'

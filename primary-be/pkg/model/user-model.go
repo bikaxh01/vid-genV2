@@ -13,7 +13,7 @@ import (
 
 type User struct {
 	ID       string `gorm:"type:uuid;primaryKey" json:"id"`
-	Email    string `gorm:"primaryKey" json:"email" validate:"required"`
+	Email    string ` json:"email" validate:"required"`
 	UserName string `json:"userName" validate:"required"`
 	Password string `json:"password" validate:"required"`
 	Projects  []Project `gorm:"foreignKey:UserId"`
@@ -22,9 +22,12 @@ type User struct {
 	
 }
 
+
 func init() {
 	db.Connect()
-	//  db.Db.AutoMigrate(&User{}, &Project{}, &Scene{})
+	db.ConnectRedisClient()
+	// db.Db.AutoMigrate(&User{}, &Project{}, &Scene{})
+	
 }
 
 func (user *User) Save() (*User, error) {

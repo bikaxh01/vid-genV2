@@ -59,7 +59,9 @@ func GenerateScenesHandler(c *fiber.Ctx) error {
 	}
 
 	// push to queue
+	model.PushToQueue(project)
 
+	
 	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
 		"message": "Generating scenes",
 		"data":    p,
@@ -72,8 +74,7 @@ func CreateSceneHandler(c *fiber.Ctx) error {
 
 	var scene model.Scene
 	err := c.BodyParser(&scene)
-	
-	fmt.Println("REqu body 🟢",scene)
+
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"message": "Invalid req body",
@@ -88,9 +89,30 @@ func CreateSceneHandler(c *fiber.Ctx) error {
 		})
 	}
 
-		return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
+	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
 		"message": "scene created",
 		"data":    s,
+	})
+
+}
+
+func SaveVideoUrlHandler(c *fiber.Ctx) error {
+
+	projectId := c.Params("projectId")
+
+	var project model.Project
+
+	c.BodyParser(&project)
+	project.ID = projectId
+	err := project.SaveVideoUrl()
+
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"message": "something went wrong",
+		})
+	}
+	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
+		"message": "Updated Success",
 	})
 
 }
